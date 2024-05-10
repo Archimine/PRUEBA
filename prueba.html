@@ -57,7 +57,7 @@
         });
 
         function fetchFiles(searchTerm) {
-            fetch('https://api.github.com/repos/<usuario>/<repositorio>/contents/<directorio>')
+            fetch('https://api.github.com/repos/Archimine/PRUEBA/contents/main')
             .then(response => response.json())
             .then(data => {
                 var files = data.filter(file => file.type === 'file');
