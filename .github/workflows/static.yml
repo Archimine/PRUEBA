@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repositorio de Datos</title>
+    <style>
+        /* Estilos CSS para la página */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        input[type=text] {
+            padding: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type=submit] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Repositorio de Datos</h1>
+    <form id="searchForm">
+        <label for="searchTerm">Buscar:</label>
+        <input type="text" id="searchTerm" name="searchTerm" placeholder="Ingrese término de búsqueda...">
+        <input type="submit" value="Buscar">
+    </form>
+    <div id="results"></div>
+
+    <script>
+        // JavaScript para manejar la búsqueda y visualización de datos
+        document.getElementById("searchForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var searchTerm = document.getElementById("searchTerm").value.toLowerCase();
+            fetchFiles(searchTerm);
+        });
+
+        function fetchFiles(searchTerm) {
+            fetch('https://api.github.com/repos/<usuario>/<repositorio>/contents/<directorio>')
+            .then(response => response.json())
+            .then(data => {
+                var files = data.filter(file => file.type === 'file');
+                Promise.all(files.map(file => fetch(file.download_url)))
+                .then(responses => Promise.all(responses.map(response => response.text())))
+                .then(datas => {
+                    var allRows = datas.map(data => data.split('\n')).flat();
+                    var filteredRows = allRows.filter(row => row.toLowerCase().includes(searchTerm));
+                    var tableHTML = "<table>";
+                    filteredRows.forEach(row => {
+                        var cells = row.split(',');
+                        tableHTML += "<tr>";
+                        cells.forEach(cell => {
+                            tableHTML += "<td>" + cell + "</td>";
+                        });
+                        tableHTML += "</tr>";
+                    });
+                    tableHTML += "</table>";
+                    document.getElementById("results").innerHTML = tableHTML;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
